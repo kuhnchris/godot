@@ -667,14 +667,6 @@ void EditorSettings::_load_defaults(Ref<ConfigFile> p_extra_config) {
 	_initial_set("run/output/always_open_output_on_play", true);
 	_initial_set("run/output/always_close_output_on_stop", false);
 
-	/* Network */
-
-	// Debug
-	_initial_set("network/debug/remote_host", "127.0.0.1"); // Hints provided in setup_network
-
-	_initial_set("network/debug/remote_port", 6007);
-	hints["network/debug/remote_port"] = PropertyInfo(Variant::INT, "network/debug/remote_port", PROPERTY_HINT_RANGE, "1,65535,1");
-
 	// SSL
 	_initial_set("network/ssl/editor_ssl_certificates", _SYSTEM_CERTS_PATH);
 	hints["network/ssl/editor_ssl_certificates"] = PropertyInfo(Variant::STRING, "network/ssl/editor_ssl_certificates", PROPERTY_HINT_GLOBAL_FILE, "*.crt,*.pem");
@@ -1000,7 +992,7 @@ void EditorSettings::create() {
 		print_verbose("EditorSettings: Load OK!");
 
 		singleton->setup_language();
-		singleton->setup_network();
+		//singleton->setup_network();
 		singleton->load_favorites();
 		singleton->list_text_editor_themes();
 
@@ -1027,7 +1019,7 @@ fail:
 	singleton->cache_dir = cache_dir;
 	singleton->_load_defaults(extra_config);
 	singleton->setup_language();
-	singleton->setup_network();
+	//singleton->setup_network();
 	singleton->list_text_editor_themes();
 }
 
@@ -1061,39 +1053,6 @@ void EditorSettings::setup_language() {
 
 		etl++;
 	}
-}
-
-void EditorSettings::setup_network() {
-
-	List<IP_Address> local_ip;
-	IP::get_singleton()->get_local_addresses(&local_ip);
-	String hint;
-	String current = has_setting("network/debug/remote_host") ? get("network/debug/remote_host") : "";
-	String selected = "127.0.0.1";
-
-	// Check that current remote_host is a valid interface address and populate hints.
-	for (List<IP_Address>::Element *E = local_ip.front(); E; E = E->next()) {
-
-		String ip = E->get();
-
-		// link-local IPv6 addresses don't work, skipping them
-		if (ip.begins_with("fe80:0:0:0:")) // fe80::/64
-			continue;
-		// Same goes for IPv4 link-local (APIPA) addresses.
-		if (ip.begins_with("169.254.")) // 169.254.0.0/16
-			continue;
-		// Select current IP (found)
-		if (ip == current)
-			selected = ip;
-		if (hint != "")
-			hint += ",";
-		hint += ip;
-	}
-
-	// Add hints with valid IP addresses to remote_host property.
-	add_property_hint(PropertyInfo(Variant::STRING, "network/debug/remote_host", PROPERTY_HINT_ENUM, hint));
-	// Fix potentially invalid remote_host due to network change.
-	set("network/debug/remote_host", selected);
 }
 
 void EditorSettings::save() {

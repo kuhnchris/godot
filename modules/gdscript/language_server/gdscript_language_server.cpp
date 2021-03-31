@@ -40,8 +40,9 @@ GDScriptLanguageServer::GDScriptLanguageServer() {
 	started = false;
 
 	use_thread = false;
-	port = 6008;
-	_EDITOR_DEF("network/language_server/remote_port", port);
+	
+	//port = 6008;
+	port = ProjectSettings::get_singleton()->get("network/external/gdscript_port");
 	_EDITOR_DEF("network/language_server/enable_smart_resolve", true);
 	_EDITOR_DEF("network/language_server/show_native_symbols_in_editor", false);
 	_EDITOR_DEF("network/language_server/use_thread", use_thread);
@@ -62,7 +63,7 @@ void GDScriptLanguageServer::_notification(int p_what) {
 			}
 		} break;
 		case EditorSettings::NOTIFICATION_EDITOR_SETTINGS_CHANGED: {
-			int port = (int)_EDITOR_GET("network/language_server/remote_port");
+			int port = ProjectSettings::get_singleton()->get("network/external/gdscript_port");
 			bool use_thread = (bool)_EDITOR_GET("network/language_server/use_thread");
 			if (port != this->port || use_thread != this->use_thread) {
 				this->stop();
@@ -82,7 +83,7 @@ void GDScriptLanguageServer::thread_main(void *p_userdata) {
 }
 
 void GDScriptLanguageServer::start() {
-	port = (int)_EDITOR_GET("network/language_server/remote_port");
+	port = ProjectSettings::get_singleton()->get("network/external/gdscript_port");
 	use_thread = (bool)_EDITOR_GET("network/language_server/use_thread");
 	if (protocol.start(port, IP_Address("127.0.0.1")) == OK) {
 		EditorNode::get_log()->add_message("--- GDScript language server started ---", EditorLog::MSG_TYPE_EDITOR);

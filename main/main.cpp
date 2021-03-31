@@ -419,6 +419,11 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	bool saw_vsync_via_compositor_override = false;
 #ifdef TOOLS_ENABLED
 	bool found_project = false;
+	List<IP_Address> local_ip;
+	String hint;
+	String current;
+	String selected;
+
 #endif
 
 	packed_data = PackedData::get_singleton();
@@ -459,7 +464,6 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 
 			print_line(get_full_version_string());
 			goto error;
-
 		} else if (I->get() == "-v" || I->get() == "--verbose") { // verbose output
 
 			OS::get_singleton()->_verbose_stdout = true;
@@ -917,10 +921,43 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	GLOBAL_DEF("network/limits/debugger_stdout/max_warnings_per_second", 100);
 	ProjectSettings::get_singleton()->set_custom_property_info("network/limits/debugger_stdout/max_warnings_per_second", PropertyInfo(Variant::INT, "network/limits/debugger_stdout/max_warnings_per_second", PROPERTY_HINT_RANGE, "0, 200, 1, or_greater"));
 
+#ifdef TOOLS_ENABLED
+	GLOBAL_DEF("network/external/gdscript_port", 6008);
+	GLOBAL_DEF("network/external/external_debug_ip", "127.0.0.1");
+	GLOBAL_DEF("network/external/external_debug_port", 6007);
+
+	IP::get_singleton()->get_local_addresses(&local_ip);
+	current = ProjectSettings::get_singleton()->get("network/external/external_debug_ip") ? ProjectSettings::get_singleton()->get("network/external/external_debug_ip") : "";
+	selected = "127.0.0.1";
+
+	// Check that current remote_host is a valid interface address and populate hints.
+	for (List<IP_Address>::Element *E = local_ip.front(); E; E = E->next()) {
+
+		String ip = E->get();
+
+		// link-local IPv6 addresses don't work, skipping them
+		if (ip.begins_with("fe80:0:0:0:")) // fe80::/64
+			continue;
+		// Same goes for IPv4 link-local (APIPA) addresses.
+		if (ip.begins_with("169.254.")) // 169.254.0.0/16
+			continue;
+		// Select current IP (found)
+		if (ip == current)
+			selected = ip;
+		if (hint != "")
+			hint += ",";
+		hint += ip;
+	}
+
+	ProjectSettings::get_singleton()->set_custom_property_info("network/external/gdscript_port", PropertyInfo(Variant::INT, "network/external/gdscript_port", PROPERTY_HINT_RANGE, "0,65535,1,or_greater")); //no negative numbers
+	ProjectSettings::get_singleton()->set_custom_property_info("network/external/external_debug_ip", PropertyInfo(Variant::STRING, "network/external/external_debug_ip", PROPERTY_HINT_ENUM, hint));
+	ProjectSettings::get_singleton()->set_custom_property_info("network/external/external_debug_port", PropertyInfo(Variant::INT, "network/external/external_debug_port", PROPERTY_HINT_RANGE, "0,65535,1,or_greater")); //no negative numbers
+#endif 
+
 	if (debug_mode == "remote") {
 
 		ScriptDebuggerRemote *sdr = memnew(ScriptDebuggerRemote);
-		uint16_t debug_port = 6007;
+		uint16_t debug_port = ProjectSettings::get_singleton()->get("network/external/external_debug_port");
 		if (debug_host.find(":") != -1) {
 			int sep_pos = debug_host.find_last(":");
 			debug_port = debug_host.substr(sep_pos + 1, debug_host.length()).to_int();

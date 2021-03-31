@@ -246,8 +246,8 @@ EditorExportPreset::EditorExportPreset() :
 
 void EditorExportPlatform::gen_debug_flags(Vector<String> &r_flags, int p_flags) {
 
-	String host = EditorSettings::get_singleton()->get("network/debug/remote_host");
-	int remote_port = (int)EditorSettings::get_singleton()->get("network/debug/remote_port");
+	String host = ProjectSettings::get_singleton()->get("network/external/external_debug_ip");
+	int remote_port = (int)ProjectSettings::get_singleton()->get("network/external/external_debug_port"); 
 
 	if (p_flags & DEBUG_FLAG_REMOTE_DEBUG_LOCALHOST)
 		host = "localhost";
@@ -1156,8 +1156,8 @@ Error EditorExportPlatform::export_zip(const Ref<EditorExportPreset> &p_preset, 
 
 void EditorExportPlatform::gen_export_flags(Vector<String> &r_flags, int p_flags) {
 
-	String host = EditorSettings::get_singleton()->get("network/debug/remote_host");
-	int remote_port = (int)EditorSettings::get_singleton()->get("network/debug/remote_port");
+	String host = ProjectSettings::get_singleton()->get("network/external/external_debug_ip");
+	int remote_port = (int)ProjectSettings::get_singleton()->get("network/external/external_debug_port"); 
 
 	if (p_flags & DEBUG_FLAG_REMOTE_DEBUG_LOCALHOST)
 		host = "localhost";

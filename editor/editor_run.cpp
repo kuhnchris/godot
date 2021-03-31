@@ -47,8 +47,8 @@ Error EditorRun::run(const String &p_scene, const String &p_custom_args, const L
 	List<String> args;
 
 	String resource_path = ProjectSettings::get_singleton()->get_resource_path();
-	String remote_host = EditorSettings::get_singleton()->get("network/debug/remote_host");
-	int remote_port = (int)EditorSettings::get_singleton()->get("network/debug/remote_port");
+	String remote_host = ProjectSettings::get_singleton()->get("network/external/external_debug_ip");
+	int remote_port = (int)ProjectSettings::get_singleton()->get("network/external/external_debug_port") ;
 
 	if (resource_path != "") {
 		args.push_back("--path");

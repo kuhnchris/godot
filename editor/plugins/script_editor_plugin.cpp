@@ -2124,9 +2124,11 @@ bool ScriptEditor::edit(const RES &p_resource, int p_line, int p_col, bool p_gra
 
 		if (flags.size()) {
 			String project_path = ProjectSettings::get_singleton()->get_resource_path();
+			int gdPort = ProjectSettings::get_singleton()->get("network/external/gdscript_port");
 
 			flags = flags.replacen("{line}", itos(p_line > 0 ? p_line : 0));
 			flags = flags.replacen("{col}", itos(p_col));
+			flags = flags.replacen("{gdport}", itos(gdPort));
 			flags = flags.strip_edges().replace("\\\\", "\\");
 
 			int from = 0;

@@ -1925,7 +1925,7 @@ public:
 
 				if (p_debug_flags & DEBUG_FLAG_REMOTE_DEBUG) {
 
-					int dbg_port = EditorSettings::get_singleton()->get("network/debug/remote_port");
+					int dbg_port = ProjectSettings::get_singleton()->get("network/external/external_debug_port");
 					args.clear();
 					args.push_back("-s");
 					args.push_back(devices[p_device].id);
